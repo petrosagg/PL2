@@ -86,6 +86,8 @@ Declare Scope hoare_spec_scope.
 
 Notation "P 'AND' Q" := (assert_and P Q) (at level 68, left associativity) : hoare_spec_scope.
 
+Notation "P 'OR' Q" := (assert_or P Q) (at level 68, left associativity) : hoare_spec_scope.
+
 Open Scope hoare_spec_scope.
 
 (** *** Inference Rules  *)
@@ -478,7 +480,7 @@ Hint Constructors triple : hoareDB.
 
 Ltac unfold_all :=
   unfold assert_implies, assertion_sub,
-    binterp, update_st, TRUE, FALSE, assert_and in *.
+    binterp, update_st, TRUE, FALSE, assert_and, assert_or in *.
 
 
 (** And a tactic to simplify the environment during a proof. *)
@@ -924,9 +926,7 @@ Fixpoint wlp (ac : acom) (Q : assertion) : assertion :=
   | DCSkip => Q
   | DCAsgn X a => Q [X |-> a]
   | DCSeq c1 c2 => wlp c1 (wlp c2 Q)
-  | DCIf b c1 c2 =>
-      (fun st => (binterp st b = true -> wlp c1 Q st) /\
-                 (binterp st b = false -> wlp c2 Q st))
+  | DCIf b c1 c2 => (TRUE b AND wlp c1 Q) OR (FALSE b AND wlp c2 Q)
   | DCWhile b INV c => INV
   end.
 
@@ -963,13 +963,17 @@ Proof.
   - (* CIf *)
     eapply H_If.
     + eapply H_PreStrengthening.
-      eapply IHac1.
-      hoare_auto.
-      hoare_auto.
+      * apply IHac1.
+        apply Hvc.
+      * unfold assert_implies.
+        intro st.
+        destruct b; (unfold_all; simpl; intro H; do 3 destruct H; congruence).
     + eapply H_PreStrengthening.
-      eapply IHac2.
-      hoare_auto.
-      hoare_auto.
+      * apply IHac2.
+        apply Hvc.
+      * unfold assert_implies.
+        intro st.
+        destruct b; (unfold_all; simpl; intro H; do 3 destruct H; congruence).
   - (* CWhile *)
     eapply H_PostWeakening. apply (H_While INV).
     eapply H_PreStrengthening. eapply IHac. now auto.
