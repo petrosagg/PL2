@@ -31,7 +31,7 @@ Variables in Rust are declared with the `let` keyword (thanks FP).
 
 ```rust,editable
 fn main() {
-    let answer : u64 = 42;
+    let answer: u64 = 42;
     println!("The answer to life the universe and everything is {}.", answer);
 }
 ```
@@ -39,6 +39,22 @@ fn main() {
 The variable answer has a _strong_, _static_ type `u64` (denoting an unsigned
 integer with 64 bits). Rust has type inference, so the type annotation could
 have been omitted.
+> Το συγκεκριμένο παράδειγμα είναι λίγο περίεργο για το type inference γιατί
+> χωρίς το annotation κανονικά δεν θα είχε αρκετή πληροφορία για τον τύπο της
+> μεταβλητής και θα έβγαζε compile error.
+> Τα number literals στη Rust έχουν ειδική μεταχείρηση και στο type inference.
+> Ο τύπος τους είναι κάποιου είδους type variable (μιας και πχ το 42 μπορεί να
+> είναι είτε u8, u16, κλπ) αλλά αν δεν γίνουν constraint σε έναν τύπο από
+> annotations του προγράμματος τότε ο compiler διαλέγει το i32 by default. Αυτό
+> γίνεται μόνο για τα number literals. Στη γενική περίπτωση αν ένα type
+> variable δεν γίνει constrain κατά το type inference τότε ο compiler πετάει
+> error. Πχ αυτό δεν παίζει:
+> fn main() {
+>     let answer = None;
+>     if answer.is_none() {
+>         println!("hello");
+>     }
+> }
 
 By default, variables are _immutable_ (yes, thanks FP again). 
 
@@ -87,9 +103,14 @@ For example, `u16` is an 16-bit unsigned integer, holding values from 0 to
 The overflow behavior is different depending on compiler flags. When compiling
 in debug mode, Rust will trap overflows throwing an unrecoverable error
 (_panic_). Then compiling release mode, there are no runtime checks for
-overflows will wrap around. 
+overflows and will wrap around. 
+> Note: Το overflow είναι undefined behavior, ίδιο με το να κάνεις access out
+> of bounds. Δηλαδή ο compiler υποθέτει ότι δεν συμβαίνει ποτέ, ακόμα και στο
+> release build. Αν θες να κάνεις overflowing arithmetic πρέπει να
+> χρησιμοποιήσεις ειδικά functions.
+> https://doc.rust-lang.org/std/num/struct.Wrapping.html
 
-Additionally, Rust has the `isize` and `usize` types that depend on the machines
+Additionally, Rust has the `isize` and `usize` types that depend on the machine's
 architecture. 
 
 #### Floating Point Numbers
@@ -146,12 +167,12 @@ specifier calls.
 
 #### Arrays
 
-Arrays are similar to tuples, but all elements must have the same type. It's
+Arrays are similar to tuples, but all elements must have the same type. Its
 type is fixed and statically known. They are allocated on the stack. 
 
 ```rust,editable
 fn main() {
-  let a : [u32;5]= [1,2,3,4,5];
+  let a: [u32; 5] = [1,2,3,4,5];
 
   println!("The 2nd element is {}", a[1]);
 }
@@ -167,12 +188,12 @@ The following program compiles fine and throws an error at runtime. You can also
 see an example of Rust function (yes, arrows again).
 
 ```rust,editable
-fn access(a : [u32;5], n : usize) -> u32{ 
+fn access(a: [u32; 5], n: usize) -> u32{ 
   return a[n];
 }
 
 fn main() {
-  let a : [u32;5]= [1,2,3,4,5];
+  let a: [u32; 5]= [1,2,3,4,5];
 
   println!("The 2nd element is {}", access(a, 7));
 }

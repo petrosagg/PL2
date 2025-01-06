@@ -26,6 +26,9 @@ fn main() {
     let mut point2 = Point { y: 4, x: 3 }; // fields don't have to be in order
 
     point2.x += 1; // move point2
+    // Σε αυτή τη γραμμή δεν γίνεται κάποιο move, το point2.x είναι ένα place
+    // expression στο οποίο γίνεται το add-assign. Για να γίνει move θα έπρεπε να
+    // έχει ένα καινούριο let binding ή να περαστεί το point2 ως παράμετρος κάπου
 
     let point3 = add(point1, point2);
 
@@ -52,7 +55,7 @@ struct Point {
 struct TwoPoints(Point, Point);
 
 fn add(ps: TwoPoints) -> Point {
-    let TwoPoints(pA, pB) = ps; // tuple structs can be pattern matched 
+    let TwoPoints(pA, pB) = ps; // tuple structs can be pattern matched  (field structs and enums can also be pattern matched)
 
     return (Point { x : pA.x + pB.x,
                     y : pA.y + pA.y,  // dot notation also works
@@ -84,7 +87,7 @@ in the context of a struct instance.
 The first parameter of a method is always named `self` and refers to the struct
 instance the method is called on. Methods can take ownership of the struct
 instance or a (mutable) reference to it, written `&self` (resp. `&mut self`)
-which is a shorthand for `self: &Self` (resp. `self: &mut self`).
+which is a shorthand for `self: &Self` (resp. `self: &mut Self`).
 
 Here’s an example illustrating struct methods:
 
@@ -97,25 +100,25 @@ struct Point {
 }
 
 impl Point {
-    // distance from origin
+    /// distance from origin
     fn dist0(&self) -> f64 {
         // converts to f64 and calculares the square root
-        ((self.x^2 + self.y^2) as f64).sqrt()
+        ((self.x.pow(2) + self.y.pow(2)) as f64).sqrt()
     }
 
-    // distance from any point
+    /// distance from any point
     fn dist(&self, p : Point) -> f64 {
-        // converts to f64 and calculares the square root
-        (((self.x - p.x)^2 + (self.y - p.y)^2) as f64).sqrt()
+        // converts to f64 and calculates the square root
+        (((self.x - p.x).pow(2) + (self.y - p.y).pow(2)) as f64).sqrt()
     }
 
-    // add two points
-    fn add (&self, p : Point) -> Point {
+    /// add two points
+    fn add(&self, p : Point) -> Point {
       Point { x : self.x + self.x,
               y : self.y + self.y }
     }
 
-    fn moveUp (&mut self) {
+    fn moveUp(&mut self) {
         self.y += 1
     }
 }
@@ -179,7 +182,7 @@ fn main() {
 ```
 
 ## Recursive Types
-Rust allows definition of recursive structs that can refer to themselves Recursive types have some restrictions:
+Rust allows definition of recursive structs that can refer to themselves. Recursive types have some restrictions:
 
 - They must be under some struct or enum. 
 - They must be finite.

@@ -57,6 +57,9 @@ fn main () {
     // take a mutable reference of x 
     let r : &mut u32 = &mut x;
     *r += 1;
+    // Worth noting ότι εδώ το binding r δεν χρειάζεται να είναι το ίδιο mut,
+    // γιατί η τιμή του r δεν αλλάζει, μόνο η τιμή αυτού στο οποίο το r κάνιε point
+    // αλλάζει
     println!("Hello, it is {} again.", r);
 }
 ```
